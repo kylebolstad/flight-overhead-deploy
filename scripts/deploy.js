@@ -6,12 +6,6 @@ import fs from 'fs'
 import * as child from 'child_process'
 import 'dotenv/config'
 
-const axios_config = {
-	headers: { Authorization: `Bearer ${process.env.TIDBYT_API_TOKEN}` }
-}
-
-axios_throttle.use(axios, { requestsPerSecond: process.env.PROVIDER_TTL_SECONDS })
-
 const AIRLABS_API_KEY = process.env.AIRLABS_API_KEY
 const BACKGROUND = (String(process.env.TIDBYT_BACKGROUND).toLowerCase() === 'true')
 const DISABLE_END_HOUR = process.env.DISABLE_END_HOUR
@@ -27,11 +21,18 @@ const PROVIDER_TTL_SECONDS = process.env.PROVIDER_TTL_SECONDS
 const RADIUS = process.env.RADIUS
 const RETURN_MESSAGE_ON_EMPTY = process.env.RETURN_MESSAGE_ON_EMPTY
 const SHOW_ROUTE = process.env.SHOW_ROUTE
+const TIDBYT_API_TOKEN = process.env.TIDBYT_API_TOKEN
 const TIDBYT_APP_PATH = process.env.TIDBYT_APP_PATH
 const TIDBYT_APP_NAME = process.env.TIDBYT_APP_NAME
 const TIDBYT_DEVICE_ID = process.env.TIDBYT_DEVICE_ID
 const TIDBYT_INSTALLATION_ID = process.env.TIDBYT_INSTALLATION_ID
 const TIMEZONE = process.env.TIMEZONE
+
+const axios_config = {
+	headers: { Authorization: `Bearer ${TIDBYT_API_TOKEN}` }
+}
+
+axios_throttle.use(axios, { requestsPerSecond: PROVIDER_TTL_SECONDS })
 
 let previous_hash = ''
 let installation_exists = false;
