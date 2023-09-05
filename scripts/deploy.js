@@ -6,27 +6,48 @@ import fs from 'fs'
 import * as child from 'child_process'
 import 'dotenv/config'
 
-const AIRLABS_API_KEY = process.env.AIRLABS_API_KEY
-const BACKGROUND = (String(process.env.TIDBYT_BACKGROUND).toLowerCase() === 'true')
-const DISABLE_END_HOUR = process.env.DISABLE_END_HOUR
-const DISABLE_START_HOUR = process.env.DISABLE_START_HOUR
-const IGNORE = process.env.IGNORE
-const LIMIT = process.env.LIMIT
-const LOCATION = process.env.LOCATION
-const OPENSKY_USERNAME = process.env.OPENSKY_USERNAME
-const OPENSKY_PASSWORD = process.env.OPENSKY_PASSWORD
-const PRINT_LOG = (String(process.env.PRINT_LOG).toLowerCase() === 'true')
-const PROVIDER = process.env.PROVIDER
-const PROVIDER_TTL_SECONDS = process.env.PROVIDER_TTL_SECONDS
-const RADIUS = process.env.RADIUS
-const RETURN_MESSAGE_ON_EMPTY = process.env.RETURN_MESSAGE_ON_EMPTY
-const SHOW_ROUTE = process.env.SHOW_ROUTE
-const TIDBYT_API_TOKEN = process.env.TIDBYT_API_TOKEN
-const TIDBYT_APP_PATH = process.env.TIDBYT_APP_PATH
-const TIDBYT_APP_NAME = process.env.TIDBYT_APP_NAME
-const TIDBYT_DEVICE_ID = process.env.TIDBYT_DEVICE_ID
-const TIDBYT_INSTALLATION_ID = process.env.TIDBYT_INSTALLATION_ID
-const TIMEZONE = process.env.TIMEZONE
+const parameters = [
+	"AIRLABS_API_KEY",
+	"DISABLE_END_HOUR",
+	"DISABLE_START_HOUR",
+	"IGNORE",
+	"LIMIT",
+	"LOCATION",
+	"OPENSKY_USERNAME",
+	"OPENSKY_PASSWORD",
+	"PRINT_LOG",
+	"PROVIDER",
+	"PROVIDER_TTL_SECONDS",
+	"RADIUS",
+	"RETURN_MESSAGE_ON_EMPTY",
+	"SHOW_ROUTE",
+	"TIDBYT_API_TOKEN",
+	"TIDBYT_APP_NAME",
+	"TIDBYT_APP_PATH",
+	"TIDBYT_BACKGROUND",
+	"TIDBYT_DEVICE_ID",
+	"TIDBYT_INSTALLATION_ID",
+	"TIMEZONE",
+]
+
+let render_parameters = []
+
+parameters.forEach((key) => {
+	let value = process.env[key]
+
+	if (value?.length) {
+		render_parameters.push(`${key.toLowerCase()}=${value}`)
+
+		if (value.toLowerCase() === "true") value = true
+		else if (value.toLowerCase() === "false") value = false
+	}
+
+	Object.defineProperty(global, key.toUpperCase(), {
+    value,
+    writable: false,
+    configurable: false
+  });
+});
 
 const axios_config = {
 	headers: { Authorization: `Bearer ${TIDBYT_API_TOKEN}` }
@@ -41,7 +62,11 @@ const push = () => {
 
 	if (PRINT_LOG) console.log(Date())
 
-	let render_pixlet = child.spawn('pixlet', ['render', `${TIDBYT_APP_PATH}/${TIDBYT_APP_NAME}.star`, `provider=${PROVIDER}`,`airlabs_api_key=${AIRLABS_API_KEY}`, `opensky_username=${OPENSKY_USERNAME}`, `opensky_password=${OPENSKY_PASSWORD}`, `location=${LOCATION}`, `radius=${RADIUS}`, `provider_ttl_seconds=${PROVIDER_TTL_SECONDS}`, `timezone=${TIMEZONE}`, `disable_start_hour=${DISABLE_START_HOUR}`, `disable_end_hour=${DISABLE_END_HOUR}`, `return_message_on_empty=${RETURN_MESSAGE_ON_EMPTY}`, `ignore=${IGNORE}`, `show_route=${SHOW_ROUTE}`, `limit=${LIMIT}`, `print_log=${PRINT_LOG}`])
+	let spawn_arguments = ['render', `${TIDBYT_APP_PATH}/${TIDBYT_APP_NAME}.star`]
+
+	render_parameters.forEach((render_parameter) => { spawn_arguments.push(render_parameter) })
+
+	const render_pixlet = child.spawn('pixlet', spawn_arguments)
 
 	render_pixlet.stdout.setEncoding('utf8')
 	render_pixlet.stdout.on('data', (data) => {
@@ -66,7 +91,7 @@ const push = () => {
 							{
 								"image": data,
 								"installationID": TIDBYT_INSTALLATION_ID,
-								"background": BACKGROUND
+								"background": TIDBYT_BACKGROUND
 							},
 							axios_config
 						)
