@@ -6,33 +6,9 @@ import fs from 'fs'
 import * as child from 'child_process'
 import 'dotenv/config'
 
-const parameters = [
-	"AIRLABS_API_KEY",
-	"DISABLE_END_HOUR",
-	"DISABLE_START_HOUR",
-	"IGNORE",
-	"LIMIT",
-	"LOCATION",
-	"OPENSKY_USERNAME",
-	"OPENSKY_PASSWORD",
-	"PRINT_LOG",
-	"PROVIDER",
-	"PROVIDER_TTL_SECONDS",
-	"RADIUS",
-	"RETURN_MESSAGE_ON_EMPTY",
-	"SHOW_ROUTE",
-	"TIDBYT_API_TOKEN",
-	"TIDBYT_APP_NAME",
-	"TIDBYT_APP_PATH",
-	"TIDBYT_BACKGROUND",
-	"TIDBYT_DEVICE_ID",
-	"TIDBYT_INSTALLATION_ID",
-	"TIMEZONE",
-]
-
 let render_parameters = []
 
-parameters.forEach((key) => {
+Object.keys(process.env).slice(Object.keys(process.env).indexOf('_') + 1).forEach((key) => {
 	let value = process.env[key]
 
 	if (value?.length) {
